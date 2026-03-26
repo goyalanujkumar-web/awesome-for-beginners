@@ -71,3 +71,7 @@ public class Main {
     }
 }
 ```
+
+# Errors
+
+If you find any errors on my side, please feel free to share them so I can fix the errors.
