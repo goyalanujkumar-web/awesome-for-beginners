@@ -7,7 +7,7 @@
 
 ## What I have done
 
-I have created many files in *different* languages with some errors and it is up to **YOU** to *fix* them! :sunglasses:
+I have created many files in different languages with some errors and it is up to **YOU** to *fix* them! :sunglasses:
 
 ---
 
@@ -27,7 +27,7 @@ I have created many files in *different* languages with some errors and it is up
 # Coding languages
 
 | **Language** | **Usage** | **Boilerplate code?** |
-|---|---|
+|---|---|---|
 | C++ | C++ is a high-performance, object-oriented language used for building operating systems, game engines, and resource-intensive software requiring direct memory control. | Yes |
 | HTML | HTML is the standard markup language used to structure and display content on the World Wide Web using elements like tags and attributes. | Yes |
 | CSS | CSS is a stylesheet language used to control the visual presentation, layout, and design of web pages written in HTML. | No, not necessary in a seperate CSS file |
