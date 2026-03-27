@@ -1,3 +1,1 @@
-# Beginner Python Exercise
-
-print("Hello, World!")
+# Write code to print Hello World here:
