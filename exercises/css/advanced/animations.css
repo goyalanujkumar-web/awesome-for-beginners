@@ -1,0 +1,56 @@
+/* Exercise: Animations and Transitions */
+/* Difficulty: Advanced */
+/* Task: Implement animations and transitions in CSS */
+
+/* TODO: Fix the CSS below */
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+.box {
+    width: 100px;
+    height: 100px;
+    background-color: #3498db;
+    border-radius: 8px;
+    
+    /* Fix the transition property */
+    transition: all 0.3s ease;
+    margin: 20px;
+}
+
+.box:hover {
+    /* Fix the hover state */
+    background-color: #e74c3c;
+    transform: scale(1.2) rotate(10deg);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Fix the keyframe animation */
+@keyframes slide {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(200px);
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.animated-box {
+    width: 100px;
+    height: 100px;
+    background-color: #2ecc71;
+    border-radius: 8px;
+    
+    /* Fix the animation property */
+    animation: slide 3s infinite ease-in-out;
+    margin: 20px;
+}
