@@ -1,0 +1,15 @@
+# Compiled files
+__pycache__/
+*.py[cod]
+*.class
+*.jar
+*.o
+*.exe
+node_modules/
+.vscode/
+.idea/
+build/
+dist/
+target/
+.DS_Store
+*.log
