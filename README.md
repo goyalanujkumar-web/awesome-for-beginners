@@ -26,14 +26,14 @@ I have created many files in different languages with some errors and it is up t
 
 # Coding languages
 
-| **Language** | **Usage** | **Boilerplate code?** |
+| **Language** | **Usage** | **Logo** | **Boilerplate code?** |
 |---|---|---|
-| C++ | C++ is a high-performance, object-oriented language used for building operating systems, game engines, and resource-intensive software requiring direct memory control. | Yes |
-| HTML | HTML is the standard markup language used to structure and display content on the World Wide Web using elements like tags and attributes. | Yes |
-| CSS | CSS is a stylesheet language used to control the visual presentation, layout, and design of web pages written in HTML. | No, not necessary in a seperate CSS file |
-| JavaScript | JavaScript is a high-level, interpreted scripting language used to create interactive and dynamic content on websites and power full-stack applications. | No, not necessary in a seperate JS file |
-| Java | Java is a versatile, object-oriented language used for building enterprise-grade applications, Android mobile apps, and large-scale backend systems. | Yes |
-| Python | Python is a versatile, high-level language used for data science, web development, and automation due to its simple, readable syntax. | No |
+| C++ | C++ is a high-performance, object-oriented language used for building operating systems, game engines, and resource-intensive software requiring direct memory control. | ![cpp logo image](images/cpp.png) | Yes |
+| HTML | HTML is the standard markup language used to structure and display content on the World Wide Web using elements like tags and attributes. | ![html logo image](images/html.png) | Yes |
+| CSS | CSS is a stylesheet language used to control the visual presentation, layout, and design of web pages written in HTML. | ![css logo image](images/css.png) | No, not necessary in a seperate CSS file |
+| JavaScript | JavaScript is a high-level, interpreted scripting language used to create interactive and dynamic content on websites and power full-stack applications. | ![js logo image](images/js.png) | No, not necessary in a seperate JS file |
+| Java | Java is a versatile, object-oriented language used for building enterprise-grade applications, Android mobile apps, and large-scale backend systems. | ![java logo image](images/java.png) | Yes |
+| Python | Python is a versatile, high-level language used for data science, web development, and automation due to its simple, readable syntax. | ![python logo image](images/python.png) | No |
 
 # Boilerplate code for each language (if needed)
 
