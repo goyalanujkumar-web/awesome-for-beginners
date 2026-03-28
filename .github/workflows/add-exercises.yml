@@ -1,0 +1,491 @@
+  - name: Create exercise files
+    run: |
+      set -e
+      mkdir -p exercises/javascript/Beginner exercises/javascript/Intermediate exercises/javascript/Advanced
+      mkdir -p exercises/html/Beginner exercises/html/Intermediate exercises/html/Advanced
+      mkdir -p exercises/css/Beginner exercises/css/Intermediate exercises/css/Advanced
+      mkdir -p exercises/java/Beginner exercises/java/Intermediate exercises/java/Advanced
+      mkdir -p exercises/cpp/Beginner exercises/cpp/Intermediate exercises/cpp/Advanced
+
+      cat > exercises/javascript/javascript_exercises.md <<'EOF'
+      # JavaScript Exercise Files
+
+      ## Beginner
+
+      - **Exercise Name:** Hello World  
+        **File Path:** `javascript/Beginner/Exercise_1.js`  
+        **Description:** Fix the code to correctly print 'Hello, World!' and a personalized greeting.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      - **Exercise Name:** Simple Calculator  
+        **File Path:** `javascript/Beginner/Exercise_2.js`  
+        **Description:** Fix arithmetic and type issues so operations return correct numeric results.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      ## Intermediate
+
+      - **Exercise Name:** Factorial Calculator  
+        **File Path:** `javascript/Intermediate/Exercise_1.js`  
+        **Description:** Fix the factorial function (edge cases / base case) so it works for 0 and positive integers.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      - **Exercise Name:** Rock, Paper, Scissors Game  
+        **File Path:** `javascript/Intermediate/Exercise_2.js`  
+        **Description:** Fix game logic and comparisons so user vs computer outcomes are correct.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      ## Advanced
+
+      - **Exercise Name:** Fetch JSON Data (Node)  
+        **File Path:** `javascript/Advanced/Exercise_1.js`  
+        **Description:** Fix async/await or promise usage to correctly fetch and log JSON from a public API.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+
+      - **Exercise Name:** Simple REST API (Express)  
+        **File Path:** `javascript/Advanced/Exercise_2.js`  
+        **Description:** Fix an Express server implementation so routes respond correctly (buggy middleware/routes).  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+      EOF
+
+      cat > exercises/javascript/Beginner/Exercise_1.js <<'EOF'
+      const name = "Alice"
+      console.log("Hello, World!")
+      consol.log("Welcome" +name) // intentional typo and missing space
+      EOF
+
+      cat > exercises/javascript/Beginner/Exercise_2.js <<'EOF'
+      // Simple calculator with a type bug
+      const a = prompt("Enter first number:");
+      const b = prompt("Enter second number:");
+      const sum = a + b;
+      console.log("Sum is: " + sum); // results in string concatenation
+      EOF
+
+      cat > exercises/javascript/Intermediate/Exercise_1.js <<'EOF'
+      // Factorial with incorrect base case
+      function factorial(n) {
+        if (n === 1) return 1;
+        return n * factorial(n - 1);
+      }
+      console.log(factorial(0));
+      EOF
+
+      cat > exercises/javascript/Intermediate/Exercise_2.js <<'EOF'
+      // Rock Paper Scissors with logic/case bugs
+      const user = prompt("rock/paper/scissors");
+      const comp = ["rock","paper","scissors"][Math.floor(Math.random()*3)];
+      if (user = comp) {
+        console.log("Tie");
+      } else if (user == "Rock" && comp == "scissors") {
+        console.log("You win");
+      } else {
+        console.log("You lose");
+      }
+      EOF
+
+      cat > exercises/javascript/Advanced/Exercise_1.js <<'EOF'
+      // Fetch JSON but missing await and mixing .then
+      async function fetchData() {
+        const r = fetch('https://jsonplaceholder.typicode.com/todos/1');
+        const data = r.json();
+        console.log(data.title);
+      }
+      fetchData();
+      EOF
+
+      cat > exercises/javascript/Advanced/Exercise_2.js <<'EOF'
+      // Express server missing body parsing and route typo
+      const express = require('express')
+      const app = express()
+      let todos = []
+      app.post('/todo', (req, res) => {
+        todos.push(req.body) // will be undefined without body parser
+        res.send('ok')
+      })
+      app.listen(3000)
+      EOF
+
+      cat > exercises/html/html_exercises.md <<'EOF'
+      # HTML Exercise Files
+
+      ## Beginner
+
+      - **Exercise Name:** Simple Web Page  
+        **File Path:** `html/Beginner/Exercise_1.html`  
+        **Description:** Fix basic markup errors so the page renders correctly.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      - **Exercise Name:** Image & Link Fix  
+        **File Path:** `html/Beginner/Exercise_2.html`  
+        **Description:** Fix broken image path and incorrect anchor attributes.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      ## Intermediate
+
+      - **Exercise Name:** Form Validation Markup  
+        **File Path:** `html/Intermediate/Exercise_1.html`  
+        **Description:** Correct form attributes and input elements for proper validation.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      - **Exercise Name:** Semantic Structure  
+        **File Path:** `html/Intermediate/Exercise_2.html`  
+        **Description:** Improve semantic tags and fix nesting issues.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      ## Advanced
+
+      - **Exercise Name:** Interactive Page Bug  
+        **File Path:** `html/Advanced/Exercise_1.html`  
+        **Description:** Fix JavaScript selection issues and event wiring on the page.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+
+      - **Exercise Name:** Asset Link Fixes  
+        **File Path:** `html/Advanced/Exercise_2.html`  
+        **Description:** Correct relative asset paths and meta tags for proper rendering.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+      EOF
+
+      cat > exercises/html/Beginner/Exercise_1.html <<'EOF'
+      <!DOCTYPE html
+      <html>
+        <head>
+          <title>Test Page</title>
+        <head>
+        <body>
+          <h1>Hello World
+          <p>Welcome to the test page
+        </body>
+      </html>
+      EOF
+
+      cat > exercises/html/Beginner/Exercise_2.html <<'EOF'
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Images</title>
+        </head>
+        <body>
+          <img src="images/logo.png" alt="Logo">
+          <a href="www.example.com">Visit</a> <!-- missing protocol -->
+        </body>
+      </html>
+      EOF
+
+      cat > exercises/html/Intermediate/Exercise_1.html <<'EOF'
+      <!DOCTYPE html>
+      <html>
+        <body>
+          <form action="/submit" method="get">
+            <input type="text" name="email" required="false">
+            <input type="submit" value="Send">
+          </form>
+        </body>
+      </html>
+      EOF
+
+      cat > exercises/html/Intermediate/Exercise_2.html <<'EOF'
+      <!DOCTYPE html>
+      <html>
+        <head></head>
+        <body>
+          <div>
+            <h2>Title</h2>
+            <p>Paragraph
+              <section>Section inside p</section>
+            </p>
+          </div>
+        </body>
+      </html>
+      EOF
+
+      cat > exercises/html/Advanced/Exercise_1.html <<'EOF'
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Interactive</title>
+        </head>
+        <body>
+          <button id="btn">Click</button>
+          <script>
+            document.querySelector('#button').addEventListener('click', function(){
+              alert('Clicked');
+            })
+          </script>
+        </body>
+      </html>
+      EOF
+
+      cat > exercises/html/Advanced/Exercise_2.html <<'EOF'
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <link rel="stylesheet" href="css/styles.css">
+          <meta name="viewport" content="width-device-width, initial-scale=1.0">
+          <title>Assets</title>
+        </head>
+        <body>
+          <img src="./assets/logo.svg" alt="Logo">
+        </body>
+      </html>
+      EOF
+
+      cat > exercises/css/css_exercises.md <<'EOF'
+      # CSS Exercise Files
+
+      ## Beginner
+
+      - **Exercise Name:** Basic Styling  
+        **File Path:** `css/Beginner/Exercise_1.css`  
+        **Description:** Fix property typos and syntax so styles apply.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      - **Exercise Name:** Selector Order  
+        **File Path:** `css/Beginner/Exercise_2.css`  
+        **Description:** Fix cascading/specificity so the intended rule is applied.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      ## Intermediate
+
+      - **Exercise Name:** Flexbox Layout  
+        **File Path:** `css/Intermediate/Exercise_1.css`  
+        **Description:** Fix missing container properties so flex children align as intended.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      - **Exercise Name:** Responsive Media Query  
+        **File Path:** `css/Intermediate/Exercise_2.css`  
+        **Description:** Correct media query syntax to make layout responsive.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      ## Advanced
+
+      - **Exercise Name:** Grid Placement  
+        **File Path:** `css/Advanced/Exercise_1.css`  
+        **Description:** Fix grid-area names and placement so items appear in the right cells.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+
+      - **Exercise Name:** Animations Bug  
+        **File Path:** `css/Advanced/Exercise_2.css`  
+        **Description:** Fix animation keyframes and properties so animation runs smoothly.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+      EOF
+
+      cat > exercises/css/Beginner/Exercise_1.css <<'EOF'
+      body {
+        colour: #333; /* should be color */
+        font-size: 16px
+      }
+      EOF
+
+      cat > exercises/css/Beginner/Exercise_2.css <<'EOF'
+      .title {
+        color: red;
+      }
+      #title {
+        color: blue; /* intended to be overridden but id has higher specificity */
+      }
+      EOF
+
+      cat > exercises/css/Intermediate/Exercise_1.css <<'EOF'
+      .container {
+        display: block; /* should be flex */
+      }
+      .container .item {
+        flex: 1;
+      }
+      EOF
+
+      cat > exercises/css/Intermediate/Exercise_2.css <<'EOF'
+      @media screen and (max-width: 600px) {
+        .column {
+          width: 100vw; /* should be 100% */
+        }
+      }
+      EOF
+
+      cat > exercises/css/Advanced/Exercise_1.css <<'EOF'
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 100px 100px;
+      }
+      .item-a { grid-area: header; }
+      .item-b { grid-area: content; }
+      EOF
+
+      cat > exercises/css/Advanced/Exercise_2.css <<'EOF'
+      @keyframes slide {
+        from { transform: translateX(0); }
+        to { transform: translateX(100%); }
+      }
+      .box {
+        animation: slide 2s infinite; /* missing animation-fill-mode maybe intended but keeps going */
+      }
+      EOF
+
+      cat > exercises/java/java_exercises.md <<'EOF'
+      # Java Exercise Files
+
+      ## Beginner
+
+      - **Exercise Name:** Hello World  
+        **File Path:** `java/Beginner/Exercise_1.java`  
+        **Description:** Print 'Hello, World!' to the console.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      - **Exercise Name:** Simple IO  
+        **File Path:** `java/Beginner/Exercise_2.java`  
+        **Description:** Read input and print output.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      ## Intermediate
+
+      - **Exercise Name:** Palindrome Checker  
+        **File Path:** `java/Intermediate/Exercise_1.java`  
+        **Description:** Determine if a string is a palindrome.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      - **Exercise Name:** Array Processing  
+        **File Path:** `java/Intermediate/Exercise_2.java`  
+        **Description:** Work with arrays and loops.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      ## Advanced
+
+      - **Exercise Name:** Multi-threading  
+        **File Path:** `java/Advanced/Exercise_1.java`  
+        **Description:** Implement multi-threading in an application.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+
+      - **Exercise Name:** JDBC Example  
+        **File Path:** `java/Advanced/Exercise_2.java`  
+        **Description:** Connect to a database and perform CRUD.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+      EOF
+
+      cat > exercises/java/Beginner/Exercise_1.java <<'EOF'
+      // TODO: Add Java exercise code for Hello World
+      EOF
+
+      cat > exercises/java/Beginner/Exercise_2.java <<'EOF'
+      // TODO: Add Java exercise code for Simple IO
+      EOF
+
+      cat > exercises/java/Intermediate/Exercise_1.java <<'EOF'
+      // TODO: Add Java exercise code for Palindrome Checker
+      EOF
+
+      cat > exercises/java/Intermediate/Exercise_2.java <<'EOF'
+      // TODO: Add Java exercise code for Array Processing
+      EOF
+
+      cat > exercises/java/Advanced/Exercise_1.java <<'EOF'
+      // TODO: Add Java exercise code for Multi-threading
+      EOF
+
+      cat > exercises/java/Advanced/Exercise_2.java <<'EOF'
+      // TODO: Add Java exercise code for JDBC Example
+      EOF
+
+      cat > exercises/cpp/cpp_exercises.md <<'EOF'
+      # C++ Exercise Files
+
+      ## Beginner
+
+      - **Exercise Name:** Hello World  
+        **File Path:** `cpp/Beginner/Exercise_1.cpp`  
+        **Description:** Write a program that prints 'Hello, World!'.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      - **Exercise Name:** Simple I/O  
+        **File Path:** `cpp/Beginner/Exercise_2.cpp`  
+        **Description:** Read input and print output.  
+        **Link to Folder:** [Beginner Exercises](Beginner)
+
+      ## Intermediate
+
+      - **Exercise Name:** Guess the Number  
+        **File Path:** `cpp/Intermediate/Exercise_1.cpp`  
+        **Description:** Create a number guessing game.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      - **Exercise Name:** Vectors & Loops  
+        **File Path:** `cpp/Intermediate/Exercise_2.cpp`  
+        **Description:** Work with std::vector and loops.  
+        **Link to Folder:** [Intermediate Exercises](Intermediate)
+
+      ## Advanced
+
+      - **Exercise Name:** File Handling  
+        **File Path:** `cpp/Advanced/Exercise_1.cpp`  
+        **Description:** Implement file reading and writing in C++.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+
+      - **Exercise Name:** Pointers & Memory  
+        **File Path:** `cpp/Advanced/Exercise_2.cpp`  
+        **Description:** Work with pointers and dynamic memory.  
+        **Link to Folder:** [Advanced Exercises](Advanced)
+      EOF
+
+      cat > exercises/cpp/Beginner/Exercise_1.cpp <<'EOF'
+      // TODO: Add C++ Hello World exercise
+      EOF
+
+      cat > exercises/cpp/Beginner/Exercise_2.cpp <<'EOF'
+      // TODO: Add C++ Simple I/O exercise
+      EOF
+
+      cat > exercises/cpp/Intermediate/Exercise_1.cpp <<'EOF'
+      // TODO: Add C++ Guess the Number exercise
+      EOF
+
+      cat > exercises/cpp/Intermediate/Exercise_2.cpp <<'EOF'
+      // TODO: Add C++ Vectors & Loops exercise
+      EOF
+
+      cat > exercises/cpp/Advanced/Exercise_1.cpp <<'EOF'
+      // TODO: Add C++ File Handling exercise
+      EOF
+
+      cat > exercises/cpp/Advanced/Exercise_2.cpp <<'EOF'
+      // TODO: Add C++ Pointers & Memory exercise
+      EOF
+
+      cat > EXERCISES.md <<'EOF'
+      # Exercises
+
+      ## Python
+      - See [Python exercises](exercises/python/python_exercises.md)
+
+      ## JavaScript
+      - See [JavaScript exercises](exercises/javascript/javascript_exercises.md)
+
+      ## Java
+      - See [Java exercises](exercises/java/java_exercises.md)
+
+      ## C++
+      - See [C++ exercises](exercises/cpp/cpp_exercises.md)
+
+      ## HTML
+      - See [HTML exercises](exercises/html/html_exercises.md)
+
+      ## CSS
+      - See [CSS exercises](exercises/css/css_exercises.md)
+      EOF
+
+  - name: Create Pull Request
+    uses: peter-evans/create-pull-request@v5
+    with:
+      token: ${{ secrets.GITHUB_TOKEN }}
+      commit-message: chore: add exercises for JS, HTML, CSS and placeholders for Java/C++
+      title: Add exercises for JavaScript, HTML, CSS, Java, and C++
+      body: |
+        Adds per-language exercise indexes and starter files:
+        - exercises/javascript/* (index + JS buggy starter files)
+        - exercises/html/* (index + buggy HTML files)
+        - exercises/css/* (index + buggy CSS files)
+        - exercises/java/* (index + placeholders)
+        - exercises/cpp/* (index + placeholders)
+      base: main
+      branch: add-exercises-for-languages
+      labels: exercises, automated
