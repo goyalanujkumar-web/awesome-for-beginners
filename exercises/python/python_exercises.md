@@ -1,31 +1,13 @@
-# Python Exercise Files
+# Python Exercises
 
-## Beginner
+## Easy Exercises
+1. **Exercise 1:** Write a program to calculate the sum of two numbers.
+2. **Exercise 2:** Create a simple calculator that can add, subtract, multiply, and divide.
 
-`Exercise_1.py`
-- Print "Hello World!"
-- Use variables
+## Medium Exercises
+1. **Exercise 1:** Write a program to find the factorial of a number.
+2. **Exercise 2:** Create a program that simulates a simple game (e.g., Rock, Paper, Scissors).
 
-`Exercise_2.py`
-
-[**Beginner Exercises**](Beginner)
-
-## Intermediate
-
-`Exercise_1.py`
-- Print the factorial of a number
-- Use functions
-
-`Exercise_2.py`
-
-[**Intermediate Exercises**](Intermediate)
-
-## Advanced
-
-`Exercise_1.py`
-- Print the Fibonacci sequence till a number
-- Use classes/objects
-
-`Exercise_2.py`
-
-[**Advanced Exercises**](Advanced)
+## Hard Exercises
+1. **Exercise 1:** Build a web scraper using requests and BeautifulSoup to extract data from a website.
+2. **Exercise 2:** Implement a small REST API using Flask that allows users to interact with a simple database.
