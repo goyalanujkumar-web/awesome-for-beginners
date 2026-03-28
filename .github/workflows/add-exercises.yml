@@ -1,21 +1,3 @@
-  name: Manual Workflow
-
-on:
-  workflow_dispatch:
-    inputs:
-      # Optional inputs can be defined here
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'info'
-      tags:
-        description: 'Test tags'
-        required: false
-        type: choice
-        options:
-        - production
-        - staging
-        - development
   - name: Create exercise files
     run: |
       set -e
