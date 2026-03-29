@@ -8,6 +8,8 @@ on:
 jobs:
   add_exercises:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -491,9 +493,8 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 
-          chore: add exercises for JS, HTML, CSS and placeholders for Java/C++
-          title: Add exercises for JavaScript, HTML, CSS, Java, and C++
+          commit-message: "chore: add exercises for JS, HTML, CSS and placeholders for Java/C++"
+          title: "Add exercises for JavaScript, HTML, CSS, Java, and C++"
           body: |
             Adds per-language exercise indexes and starter files:
             - exercises/javascript/* (index + JS buggy starter files)
@@ -503,4 +504,4 @@ jobs:
             - exercises/cpp/* (index + placeholders)
           base: main
           branch: add-exercises-for-languages
-          labels: exercises, automated
+          labels: "exercises, automated"
