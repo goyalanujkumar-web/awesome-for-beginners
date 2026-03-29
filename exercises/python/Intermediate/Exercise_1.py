@@ -8,7 +8,7 @@
 def factrl (num):
   if isinstance(num, int):
     factorial = 1
-    for lp in range(1, `num + 1):
+    for lp in range(1, num + 1):
       factorial = factorial * lp
   else:
     print("Please pass integer number only")
