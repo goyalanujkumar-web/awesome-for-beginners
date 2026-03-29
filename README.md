@@ -1,4 +1,4 @@
-## About this repository
+# About this repository
 
 ![Awesome for Beginners](https://img.shields.io/badge/Awesome-For%20Beginners-brightgreen?style=for-the-badge&logo=github)
 
