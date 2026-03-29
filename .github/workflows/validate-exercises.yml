@@ -8,8 +8,6 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
-  pull-requests: write
-  issues: write
   contents: read
 
 jobs:
@@ -40,7 +38,6 @@ jobs:
 
       - name: Run validation
         id: validate
-        continue-on-error: true
         run: |
           VALIDATION_FAILED=0
           
@@ -101,54 +98,21 @@ jobs:
           if [ $VALIDATION_FAILED -eq 0 ]; then
             echo "VALIDATION_RESULT=PASS" >> $GITHUB_OUTPUT
             echo "✅ All validations passed!"
+            exit 0
           else
             echo "VALIDATION_RESULT=FAIL" >> $GITHUB_OUTPUT
             echo "❌ Validation failed!"
+            exit 1
           fi
 
-      - name: Add reaction - Success
-        if: steps.validate.outputs.VALIDATION_RESULT == 'PASS'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { owner, repo } = context.repo;
-            const pr_number = context.issue.number;
-            
-            console.log(`PR: ${owner}/${repo}#${pr_number}`);
-            console.log(`Validation: PASS`);
-            
-            // Create comment
-            await github.rest.issues.createComment({
-              owner: owner,
-              repo: repo,
-              issue_number: pr_number,
-              body: '✅ **Excellent Work!** All exercises validated successfully! Closing this PR.'
-            });
-            
-            // Close PR
-            await github.rest.pulls.update({
-              owner: owner,
-              repo: repo,
-              pull_number: pr_number,
-              state: 'closed'
-            });
-
-      - name: Add reaction - Failure
-        if: steps.validate.outputs.VALIDATION_RESULT == 'FAIL'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { owner, repo } = context.repo;
-            const pr_number = context.issue.number;
-            
-            console.log(`PR: ${owner}/${repo}#${pr_number}`);
-            console.log(`Validation: FAIL`);
-            
-            await github.rest.issues.createComment({
-              owner: owner,
-              repo: repo,
-              issue_number: pr_number,
-              body: '❌ **Validation Failed**\n\nPlease fix the errors and push again. The workflow will automatically re-validate.\n\n**Tips:**\n- HTML: Check for DOCTYPE and closing tags\n- CSS: Fix typos (colour → color)\n- JavaScript: Check syntax\n- Java/C++: Remove TODO comments'
-            });
+      - name: Report Results
+        if: always()
+        run: |
+          echo "Validation Result: ${{ steps.validate.outputs.VALIDATION_RESULT }}"
+          if [ "${{ steps.validate.outputs.VALIDATION_RESULT }}" = "PASS" ]; then
+            echo "✅ SUCCESS - PR will be accepted"
+            exit 0
+          else
+            echo "❌ FAILURE - PR needs fixes"
+            exit 1
+          fi
