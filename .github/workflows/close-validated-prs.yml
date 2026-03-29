@@ -1,0 +1,121 @@
+name: Close Validated PRs
+
+on:
+  workflow_run:
+    workflows: ["Validate Exercise Submissions"]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  close-valid-prs:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get PR info from workflow artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Get all open PRs
+            const prs = await github.rest.pulls.list({
+              owner: owner,
+              repo: repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            console.log(`Found ${prs.data.length} open PRs`);
+            
+            // Check each PR's latest workflow run
+            for (const pr of prs.data) {
+              console.log(`\nChecking PR #${pr.number}: ${pr.title}`);
+              
+              // Get latest workflow run for this PR
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: owner,
+                repo: repo,
+                workflow_id: 'validate-exercises.yml',
+                head_sha: pr.head.sha,
+                per_page: 1
+              });
+              
+              if (runs.data.workflow_runs.length === 0) {
+                console.log(`  No validation runs found`);
+                continue;
+              }
+              
+              const latestRun = runs.data.workflow_runs[0];
+              console.log(`  Latest run: ${latestRun.id} - Status: ${latestRun.status} - Conclusion: ${latestRun.conclusion}`);
+              
+              // If validation passed
+              if (latestRun.conclusion === 'success') {
+                console.log(`  ✅ Validation PASSED for PR #${pr.number}`);
+                
+                // Check if comment already exists
+                const comments = await github.rest.issues.listComments({
+                  owner: owner,
+                  repo: repo,
+                  issue_number: pr.number
+                });
+                
+                const botCommentExists = comments.data.some(comment => 
+                  comment.body.includes('✅ **Excellent Work!**')
+                );
+                
+                if (!botCommentExists) {
+                  // Post success comment
+                  await github.rest.issues.createComment({
+                    owner: owner,
+                    repo: repo,
+                    issue_number: pr.number,
+                    body: '✅ **Excellent Work!** All exercises have been validated successfully!\n\nYour submission is correct. Closing this PR now.'
+                  });
+                  
+                  console.log(`  Posted success comment on PR #${pr.number}`);
+                }
+                
+                // Close PR
+                await github.rest.pulls.update({
+                  owner: owner,
+                  repo: repo,
+                  pull_number: pr.number,
+                  state: 'closed'
+                });
+                
+                console.log(`  ✅ Closed PR #${pr.number}`);
+              } 
+              // If validation failed
+              else if (latestRun.conclusion === 'failure') {
+                console.log(`  ❌ Validation FAILED for PR #${pr.number}`);
+                
+                // Check if failure comment already exists
+                const comments = await github.rest.issues.listComments({
+                  owner: owner,
+                  repo: repo,
+                  issue_number: pr.number
+                });
+                
+                const failureCommentExists = comments.data.some(comment => 
+                  comment.body.includes('❌ **Validation Failed**')
+                );
+                
+                if (!failureCommentExists) {
+                  // Post failure comment
+                  await github.rest.issues.createComment({
+                    owner: owner,
+                    repo: repo,
+                    issue_number: pr.number,
+                    body: '❌ **Validation Failed**\n\nPlease fix the errors and push again. The workflow will automatically re-validate your changes.\n\n**Common Issues:**\n- HTML: Missing DOCTYPE or closing tags\n- CSS: Typos like "colour" instead of "color"\n- JavaScript: Syntax errors\n- Java/C++: TODO comments or compilation errors'
+                  });
+                  
+                  console.log(`  Posted failure comment on PR #${pr.number}`);
+                }
+              }
+            }
