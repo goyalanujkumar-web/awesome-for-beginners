@@ -1,0 +1,170 @@
+name: Validate Exercise Submissions
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup C++
+        run: sudo apt-get update && sudo apt-get install -y g++
+
+      - name: Validate JavaScript Exercises
+        id: js_validation
+        run: |
+          set +e
+          for file in exercises/javascript/**/*.js; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              node -c "$file"
+              if [ $? -ne 0 ]; then
+                echo "syntax_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            fi
+          done
+          echo "syntax_error=false" >> $GITHUB_OUTPUT
+
+      - name: Validate Java Exercises
+        id: java_validation
+        run: |
+          set +e
+          for file in exercises/java/**/*.java; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              if grep -q "TODO" "$file"; then
+                echo "todo_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+              javac "$file" 2>/dev/null
+              if [ $? -ne 0 ]; then
+                echo "compile_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            fi
+          done
+          echo "java_ok=true" >> $GITHUB_OUTPUT
+
+      - name: Validate C++ Exercises
+        id: cpp_validation
+        run: |
+          set +e
+          for file in exercises/cpp/**/*.cpp; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              if grep -q "TODO" "$file"; then
+                echo "todo_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+              g++ -c "$file" -o /tmp/test.o 2>/dev/null
+              if [ $? -ne 0 ]; then
+                echo "compile_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            fi
+          done
+          echo "cpp_ok=true" >> $GITHUB_OUTPUT
+
+      - name: Validate HTML Exercises
+        id: html_validation
+        run: |
+          set +e
+          for file in exercises/html/**/*.html; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              if ! grep -q "<!DOCTYPE" "$file"; then
+                echo "doctype_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+              if ! grep -q "<html" "$file"; then
+                echo "html_tag_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+              if ! grep -q "</html>" "$file"; then
+                echo "html_close_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            fi
+          done
+          echo "html_ok=true" >> $GITHUB_OUTPUT
+
+      - name: Validate CSS Exercises
+        id: css_validation
+        run: |
+          set +e
+          for file in exercises/css/**/*.css; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              if grep -q "colour:" "$file"; then
+                echo "typo_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+              if grep -q "display: block; /* should be flex */" "$file"; then
+                echo "flexbox_error=true" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            fi
+          done
+          echo "css_ok=true" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR - Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ **Excellent Work!** All exercises have been validated successfully! Your submission is correct.\n\nClosing this PR now.'
+            });
+
+      - name: Close PR on Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            });
+
+      - name: Comment on PR - Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '❌ **Validation Failed** - Your submission has issues:\n\n**Common Issues:**\n- ❌ Syntax errors detected\n- ❌ Files contain TODO comments (not completed)\n- ❌ Compilation errors\n- ❌ Missing HTML structure (DOCTYPE, html tags)\n- ❌ CSS typos or logic errors\n\n**Please fix the errors and resubmit your PR.** The workflow will run again automatically.\n\n**Tips:**\n- JavaScript: Check for typos and syntax errors\n- Java/C++: Remove TODO comments and ensure code compiles\n- HTML: Ensure proper DOCTYPE and closing tags\n- CSS: Fix typos (e.g., "colour" should be "color")'
+            });
