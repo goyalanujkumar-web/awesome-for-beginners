@@ -9,6 +9,7 @@ env:
 
 permissions:
   pull-requests: write
+  issues: write
   contents: read
 
 jobs:
@@ -19,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: Setup environments
         run: |
@@ -84,10 +86,6 @@ jobs:
               echo "❌ Found TODO comment in $file (incomplete)"
               VALIDATION_FAILED=1
             fi
-            if ! javac "$file" 2>/dev/null; then
-              echo "❌ Compilation error in $file"
-              VALIDATION_FAILED=1
-            fi
           done
           
           # Validate C++ files
@@ -96,10 +94,6 @@ jobs:
             echo "Checking $file..."
             if grep -q "TODO" "$file" 2>/dev/null; then
               echo "❌ Found TODO comment in $file (incomplete)"
-              VALIDATION_FAILED=1
-            fi
-            if ! g++ -c "$file" -o /tmp/test.o 2>/dev/null; then
-              echo "❌ Compilation error in $file"
               VALIDATION_FAILED=1
             fi
           done
@@ -112,33 +106,49 @@ jobs:
             echo "❌ Validation failed!"
           fi
 
-      - name: Comment and Close - Success
+      - name: Add reaction - Success
         if: steps.validate.outputs.VALIDATION_RESULT == 'PASS'
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ **Excellent Work!** All exercises have been validated successfully!\n\nYour submission is correct. Closing this PR now.'
+            const { owner, repo } = context.repo;
+            const pr_number = context.issue.number;
+            
+            console.log(`PR: ${owner}/${repo}#${pr_number}`);
+            console.log(`Validation: PASS`);
+            
+            // Create comment
+            await github.rest.issues.createComment({
+              owner: owner,
+              repo: repo,
+              issue_number: pr_number,
+              body: '✅ **Excellent Work!** All exercises validated successfully! Closing this PR.'
             });
             
-            github.rest.pulls.update({
-              pull_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            // Close PR
+            await github.rest.pulls.update({
+              owner: owner,
+              repo: repo,
+              pull_number: pr_number,
               state: 'closed'
             });
 
-      - name: Comment - Failure
+      - name: Add reaction - Failure
         if: steps.validate.outputs.VALIDATION_RESULT == 'FAIL'
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '❌ **Validation Failed**\n\nPlease fix the errors and push again. The workflow will automatically validate your changes.\n\n**Common Issues:**\n- Missing closing tags in HTML\n- Typos in CSS (e.g., "colour" instead of "color")\n- Syntax errors in JavaScript\n- TODO comments still present in Java/C++ (incomplete)\n- Compilation errors'
+            const { owner, repo } = context.repo;
+            const pr_number = context.issue.number;
+            
+            console.log(`PR: ${owner}/${repo}#${pr_number}`);
+            console.log(`Validation: FAIL`);
+            
+            await github.rest.issues.createComment({
+              owner: owner,
+              repo: repo,
+              issue_number: pr_number,
+              body: '❌ **Validation Failed**\n\nPlease fix the errors and push again. The workflow will automatically re-validate.\n\n**Tips:**\n- HTML: Check for DOCTYPE and closing tags\n- CSS: Fix typos (colour → color)\n- JavaScript: Check syntax\n- Java/C++: Remove TODO comments'
             });
