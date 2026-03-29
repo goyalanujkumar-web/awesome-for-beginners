@@ -40,108 +40,135 @@ jobs:
         id: js_validation
         continue-on-error: true
         run: |
-          if find exercises/javascript -name "*.js" | grep -q .; then
-            for file in $(find exercises/javascript -name "*.js"); do
+          if find exercises/javascript -name "*.js" -type f | grep -q .; then
+            for file in $(find exercises/javascript -name "*.js" -type f); do
               echo "Checking $file..."
               node -c "$file" || exit 1
             done
           fi
+          exit 0
 
       - name: Validate Java Exercises
         id: java_validation
         continue-on-error: true
         run: |
-          if find exercises/java -name "*.java" | grep -q .; then
-            for file in $(find exercises/java -name "*.java"); do
+          if find exercises/java -name "*.java" -type f | grep -q .; then
+            for file in $(find exercises/java -name "*.java" -type f); do
               echo "Checking $file..."
               grep -q "TODO" "$file" && exit 1
               javac "$file" 2>/dev/null || exit 1
             done
           fi
+          exit 0
 
       - name: Validate C++ Exercises
         id: cpp_validation
         continue-on-error: true
         run: |
-          if find exercises/cpp -name "*.cpp" | grep -q .; then
-            for file in $(find exercises/cpp -name "*.cpp"); do
+          if find exercises/cpp -name "*.cpp" -type f | grep -q .; then
+            for file in $(find exercises/cpp -name "*.cpp" -type f); do
               echo "Checking $file..."
               grep -q "TODO" "$file" && exit 1
               g++ -c "$file" -o /tmp/test.o 2>/dev/null || exit 1
             done
           fi
+          exit 0
 
       - name: Validate HTML Exercises
         id: html_validation
         continue-on-error: true
         run: |
-          if find exercises/html -name "*.html" | grep -q .; then
-            for file in $(find exercises/html -name "*.html"); do
+          if find exercises/html -name "*.html" -type f | grep -q .; then
+            for file in $(find exercises/html -name "*.html" -type f); do
               echo "Checking $file..."
               grep -q "<!DOCTYPE" "$file" || exit 1
               grep -q "<html" "$file" || exit 1
               grep -q "</html>" "$file" || exit 1
             done
           fi
+          exit 0
 
       - name: Validate CSS Exercises
         id: css_validation
         continue-on-error: true
         run: |
-          if find exercises/css -name "*.css" | grep -q .; then
-            for file in $(find exercises/css -name "*.css"); do
+          if find exercises/css -name "*.css" -type f | grep -q .; then
+            for file in $(find exercises/css -name "*.css" -type f); do
               echo "Checking $file..."
               grep -q "colour:" "$file" && exit 1
               grep -q "display: block; /* should be flex */" "$file" && exit 1
             done
           fi
+          exit 0
 
       - name: Determine validation status
         id: validation_status
         run: |
-          if [ "${{ steps.js_validation.outcome }}" = "failure" ] || \
-             [ "${{ steps.java_validation.outcome }}" = "failure" ] || \
-             [ "${{ steps.cpp_validation.outcome }}" = "failure" ] || \
-             [ "${{ steps.html_validation.outcome }}" = "failure" ] || \
-             [ "${{ steps.css_validation.outcome }}" = "failure" ]; then
+          echo "DEBUG: js_validation outcome: ${{ steps.js_validation.outcome }}"
+          echo "DEBUG: java_validation outcome: ${{ steps.java_validation.outcome }}"
+          echo "DEBUG: cpp_validation outcome: ${{ steps.cpp_validation.outcome }}"
+          echo "DEBUG: html_validation outcome: ${{ steps.html_validation.outcome }}"
+          echo "DEBUG: css_validation outcome: ${{ steps.css_validation.outcome }}"
+          
+          FAILED=0
+          [ "${{ steps.js_validation.outcome }}" = "failure" ] && FAILED=1
+          [ "${{ steps.java_validation.outcome }}" = "failure" ] && FAILED=1
+          [ "${{ steps.cpp_validation.outcome }}" = "failure" ] && FAILED=1
+          [ "${{ steps.html_validation.outcome }}" = "failure" ] && FAILED=1
+          [ "${{ steps.css_validation.outcome }}" = "failure" ] && FAILED=1
+          
+          if [ $FAILED -eq 1 ]; then
             echo "validation_passed=false" >> $GITHUB_OUTPUT
+            echo "VALIDATION FAILED"
           else
             echo "validation_passed=true" >> $GITHUB_OUTPUT
+            echo "VALIDATION PASSED"
           fi
 
-      - name: Comment Success and Close PR
-        if: steps.validation_status.outputs.validation_passed == 'true' && github.event_name == 'pull_request'
+      - name: Post Success Comment
+        if: steps.validation_status.outputs.validation_passed == 'true'
+        run: |
+          echo "Posting success comment..."
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+
+      - name: Comment and Close PR - Success
+        if: steps.validation_status.outputs.validation_passed == 'true'
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { data: pullRequest } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
+            const pr_number = context.payload.pull_request.number;
+            console.log("PR Number:", pr_number);
+            console.log("Repo:", context.repo.owner + "/" + context.repo.repo);
             
+            // Post comment
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: pr_number,
               body: '✅ **Excellent Work!** All exercises have been validated successfully! Your submission is correct.\n\nClosing this PR now.'
             });
             
+            // Close PR
             await github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.issue.number,
+              pull_number: pr_number,
               state: 'closed'
             });
 
-      - name: Comment Failure
-        if: steps.validation_status.outputs.validation_passed == 'false' && github.event_name == 'pull_request'
+      - name: Comment on PR - Failure
+        if: steps.validation_status.outputs.validation_passed == 'false'
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const pr_number = context.payload.pull_request.number;
+            console.log("PR Number:", pr_number);
+            
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: pr_number,
               body: '❌ **Validation Failed** - Your submission has issues:\n\n**Common Issues:**\n- ❌ Syntax errors detected\n- ❌ Files contain TODO comments (not completed)\n- ❌ Compilation errors\n- ❌ Missing HTML structure (DOCTYPE, html tags)\n- ❌ CSS typos or logic errors\n\n**Please fix the errors and resubmit your PR.** The workflow will run again automatically.\n\n**Tips:**\n- JavaScript: Check for typos and syntax errors\n- Java/C++: Remove TODO comments and ensure code compiles\n- HTML: Ensure proper DOCTYPE and closing tags\n- CSS: Fix typos (e.g., "colour" should be "color")'
             });
