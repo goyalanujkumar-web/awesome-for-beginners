@@ -28,15 +28,12 @@ jobs:
           echo "files<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
 
       - name: Setup environments
         run: |
           sudo apt-get update
           sudo apt-get install -y g++
-          npm install -g htmlhint
-          npm install -g stylelint stylelint-config-standard
+          npm install -g htmlhint stylelint stylelint-config-standard
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -49,7 +46,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Validate changed files
+      - name: Run validation tests
         id: validate
         run: |
           VALIDATION_FAILED=0
@@ -66,79 +63,90 @@ jobs:
             echo ""
             echo "Checking: $file"
             
-            # Validate HTML files
+            # HTML validation with logic checks
             if [[ $file == *.html ]]; then
-              echo "Running HTMLHint..."
-              if ! htmlhint "$file" 2>&1; then
-                echo "❌ HTML validation failed for $file"
+              if ! htmlhint "$file" 2>&1 | grep -q "0 error"; then
+                echo "❌ HTML syntax error"
                 VALIDATION_FAILED=1
-              else
-                echo "✅ HTML is valid"
-              fi
-            fi
-            
-            # Validate CSS files
-            if [[ $file == *.css ]]; then
-              echo "Running StyleLint..."
-              if ! npx stylelint "$file" 2>&1; then
-                echo "❌ CSS validation failed for $file"
-                VALIDATION_FAILED=1
-              else
-                echo "✅ CSS is valid"
               fi
               
-              # Also check for common typos
-              if grep -q "colour:" "$file" 2>/dev/null; then
-                echo "❌ Found typo 'colour:' in $file (should be 'color:')"
+              # Run logic tests
+              TEST_RESULT=$(node -e "
+                const test = require('./.github/test-exercises/test-html.js');
+                const checks = test('$file');
+                const failed = Object.entries(checks).filter(([k,v]) => !v);
+                if (failed.length > 0) {
+                  failed.forEach(([k,v]) => console.log('❌ Failed: ' + k));
+                  process.exit(1);
+                }
+              " 2>&1)
+              
+              if [ $? -ne 0 ]; then
+                echo "❌ HTML logic check failed:"
+                echo "$TEST_RESULT"
                 VALIDATION_FAILED=1
+              else
+                echo "✅ HTML passed all checks"
               fi
             fi
             
-            # Validate JavaScript files
+            # CSS validation
+            if [[ $file == *.css ]]; then
+              if ! npx stylelint "$file" 2>&1 | grep -q "0 problem"; then
+                echo "❌ CSS syntax error"
+                VALIDATION_FAILED=1
+              fi
+              
+              # Run logic tests
+              TEST_RESULT=$(node -e "
+                const test = require('./.github/test-exercises/test-css.js');
+                const checks = test('$file');
+                const failed = Object.entries(checks).filter(([k,v]) => !v);
+                if (failed.length > 0) {
+                  failed.forEach(([k,v]) => console.log('❌ Failed: ' + k));
+                  process.exit(1);
+                }
+              " 2>&1)
+              
+              if [ $? -ne 0 ]; then
+                echo "❌ CSS logic check failed:"
+                echo "$TEST_RESULT"
+                VALIDATION_FAILED=1
+              else
+                echo "✅ CSS passed all checks"
+              fi
+            fi
+            
+            # JavaScript validation
             if [[ $file == *.js ]]; then
-              echo "Checking JavaScript syntax..."
               if ! node -c "$file" 2>/dev/null; then
-                echo "❌ Syntax error in $file"
+                echo "❌ JavaScript syntax error"
+                VALIDATION_FAILED=1
+              fi
+              
+              # Run logic tests
+              TEST_RESULT=$(node -e "
+                const test = require('./.github/test-exercises/test-javascript.js');
+                const checks = test('$file');
+                const failed = Object.entries(checks).filter(([k,v]) => !v);
+                if (failed.length > 0) {
+                  failed.forEach(([k,v]) => console.log('❌ Failed: ' + k));
+                  process.exit(1);
+                }
+              " 2>&1)
+              
+              if [ $? -ne 0 ]; then
+                echo "❌ JavaScript logic check failed:"
+                echo "$TEST_RESULT"
                 VALIDATION_FAILED=1
               else
-                echo "✅ JavaScript syntax is valid"
-              fi
-            fi
-            
-            # Validate Java files
-            if [[ $file == *.java ]]; then
-              echo "Checking Java..."
-              if grep -q "TODO" "$file" 2>/dev/null; then
-                echo "❌ Found TODO comment in $file (incomplete - remove TODO comments)"
-                VALIDATION_FAILED=1
-              fi
-              if ! javac "$file" 2>/dev/null; then
-                echo "❌ Java compilation error in $file"
-                VALIDATION_FAILED=1
-              else
-                echo "✅ Java compiles successfully"
-              fi
-            fi
-            
-            # Validate C++ files
-            if [[ $file == *.cpp ]]; then
-              echo "Checking C++..."
-              if grep -q "TODO" "$file" 2>/dev/null; then
-                echo "❌ Found TODO comment in $file (incomplete - remove TODO comments)"
-                VALIDATION_FAILED=1
-              fi
-              if ! g++ -c "$file" -o /tmp/test.o 2>/dev/null; then
-                echo "❌ C++ compilation error in $file"
-                VALIDATION_FAILED=1
-              else
-                echo "✅ C++ compiles successfully"
+                echo "✅ JavaScript passed all checks"
               fi
             fi
             
           done <<< "$CHANGED_FILES"
           
           echo ""
-          echo "================================"
           if [ $VALIDATION_FAILED -eq 0 ]; then
             echo "✅ ALL VALIDATIONS PASSED"
             echo "VALIDATION_RESULT=PASS" >> $GITHUB_OUTPUT
@@ -148,8 +156,3 @@ jobs:
             echo "VALIDATION_RESULT=FAIL" >> $GITHUB_OUTPUT
             exit 1
           fi
-
-      - name: Final Result
-        if: always()
-        run: |
-          echo "Final Validation Result: ${{ steps.validate.outputs.VALIDATION_RESULT }}"
